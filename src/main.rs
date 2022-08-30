@@ -28,7 +28,7 @@ pub struct User {
 
 #[actix_web::main]
 async fn main() {
-    std::env::set_var("RUST_LOG", "debug");
+    //std::env::set_var("RUST_LOG", "debug");
     env_logger::init();
 
     // TODO: replace with environment variables for configuration
@@ -58,7 +58,7 @@ async fn main() {
     };
 
     // Run sqlx migrations on startup
-    if let Err(err) = sqlx::migrate!().run(&db_pool).await {
+    if let Err(err) = db::run_migrations(&db_pool).await {
         error!(
             "Could not run startup database migration: {}",
             err.to_string()

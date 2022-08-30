@@ -35,3 +35,10 @@ pub async fn connect(config: DBConfig) -> Result<PgPool, sqlx::Error> {
     info!("Successfully connected to the database");
     Ok(pool)
 }
+
+pub async fn run_migrations(pool: &PgPool) -> Result<(), sqlx::migrate::MigrateError> {
+    debug!("Running SQL migrations...");
+    sqlx::migrate!().run(pool).await?;
+    info!("Successfully executed SQL migrations");
+    Ok(())
+}
