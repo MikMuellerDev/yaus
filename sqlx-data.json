@@ -1,0 +1,78 @@
+{
+  "db": "PostgreSQL",
+  "9453fccea136822409551dd4293b8a229bc3096176badd6fc45f09ad35d61bdc": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "\n        DELETE FROM\n        url\n        WHERE short=$1\n        "
+  },
+  "a53f25726f9aa87f9e0d7a75177eed89d9d47284b5602ea4603ffead03032fec": {
+    "describe": {
+      "columns": [
+        {
+          "name": "short",
+          "ordinal": 0,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "target_url",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "\n        SELECT\n            short,\n            target_url\n        FROM url\n        WHERE short=$1\n        "
+  },
+  "d774638e2c312111e3d2d43a58fd727e7622adccb72be3fcb27e882a59da52b3": {
+    "describe": {
+      "columns": [
+        {
+          "name": "short",
+          "ordinal": 0,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "target_url",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "\n        SELECT\n            short,\n            target_url\n        FROM url\n        "
+  },
+  "dc363f42f13e676f09ce3af72cb253dbccccea256332e9788967c04bc8c724d3": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Varchar"
+        ]
+      }
+    },
+    "query": "\n        INSERT INTO\n        url(\n            short,\n            target_url\n        )\n        VALUES($1, $2)\n        ON CONFLICT (short) DO NOTHING\n        "
+  }
+}
