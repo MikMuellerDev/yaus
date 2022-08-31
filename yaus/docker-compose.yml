@@ -1,20 +1,35 @@
-version: '3.8'
+version: '3.7'
 services:
-  db:
-    container_name: actix-db
-    image: postgres:14.1-alpine
-    restart: always
+  yaus:
+    container_name: yaus
+    image: mikmuellerdev/yaus:0.1.0
+    restart: unless-stopped
+    depends_on: ["yaus_db"]
     environment:
-      - POSTGRES_USER=test
-      - POSTGRES_PASSWORD=test
-      - POSTGRES_DATABASE=test
+      - RUST_LOG=yaus=TRACE
+      - YAUS_PORT=80
+      - YAUS_USERNAME=user
+      - YAUS_PASSWORD=password
+
+      - YAUS_DB_HOSTNAME=yous_db
+      - YAUS_DB_PORT=5432
+      - YAUS_DB_USERNAME=yaus
+      - YAUS_DB_PASSWORD=password
+      - YAUS_DB_DATABASE=yaus
     ports:
-      - '5432:5432'
-    volumes: 
+      - 8081:80
+
+  yaus_db:
+    container_name: yous_db
+    image: postgres:14.1-alpine
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=yaus
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DATABASE=yaus
+    volumes:
       - db:/var/lib/postgresql/data
 
 volumes:
   db:
-    driver: local
-  redis:
     driver: local

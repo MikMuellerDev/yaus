@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  db:
+    container_name: yous_dev_db
+    image: postgres:14.1-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=yaus
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DATABASE=yaus
+    ports:
+      - '5432:5432'
