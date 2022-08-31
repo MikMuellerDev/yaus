@@ -84,7 +84,7 @@ pub async fn get_url(short: &str, pool: &PgPool) -> Result<Url> {
     }
 }
 
-pub async fn list_urls(pool: &PgPool) -> Result<Vec<Url>> {
+pub async fn list_urls(pool: &PgPool, max_entries: i64) -> Result<Vec<Url>> {
     Ok(sqlx::query_as!(
         Url,
         r#"
@@ -92,7 +92,9 @@ pub async fn list_urls(pool: &PgPool) -> Result<Vec<Url>> {
             short,
             target_url
         FROM url
+        LIMIT $1
         "#,
+        max_entries,
     )
     .fetch_all(pool)
     .await?)

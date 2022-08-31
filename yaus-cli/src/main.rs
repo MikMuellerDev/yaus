@@ -34,7 +34,8 @@ enum Yaus {
     /// Print a list of all configured redirects
     List {
         /// How many items should be displayed at maximum
-        max: u32,
+        #[clap(short, long)]
+        max: Option<u32>,
     },
 }
 
@@ -64,7 +65,11 @@ async fn main() {
         }
     };
     let success = match Yaus::parse() {
-        Yaus::List { max } => cli::list_redirects(&client, max).await.is_ok(),
+        Yaus::List { max } => {
+            cli::list_redirects(&client, if let Some(max) = max { max } else { u32::MAX })
+                .await
+                .is_ok()
+        }
         Yaus::Get { short } => cli::get_target(&client, &short).await.is_ok(),
         Yaus::New { short, target_url } => {
             cli::create_redirect(&client, &api::Redirect { short, target_url })

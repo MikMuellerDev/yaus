@@ -51,8 +51,8 @@ pub async fn get_target(requested_resource: Path<String>, state: Data<State>) ->
     }
 }
 
-pub async fn list_urls(state: Data<State>) -> HttpResponse {
-    match url::list_urls(&state.db_pool).await {
+pub async fn list_urls(limit: Path<u32>, state: Data<State>) -> HttpResponse {
+    match url::list_urls(&state.db_pool, limit.to_owned() as i64).await {
         Ok(urls) => HttpResponse::Ok().json(urls),
         Err(_) => HttpResponse::InternalServerError().json(GenericResponse::err(
             "Could not list URLs",

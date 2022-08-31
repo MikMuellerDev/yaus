@@ -85,7 +85,7 @@ async fn main() {
                     .route("/url/{short_id}", web::get().to(api::get_target))
                     .route("/url", web::post().to(api::create_url))
                     .route("/url/{short_id}", web::delete().to(api::delete_url))
-                    .route("/urls", web::get().to(api::list_urls)),
+                    .route("/urls/{limit}", web::get().to(api::list_urls)),
             )
     })
     .bind(("localhost", 8080))
