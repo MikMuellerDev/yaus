@@ -9,7 +9,7 @@ default-run = "yaus"
 [dependencies]
 actix-web = "4.1.0"
 serde = { version = "1.0.137", features = ["derive"] }
-sqlx = { version = "0.6", features = [ "runtime-actix-native-tls" , "postgres", "offline" ] }
+sqlx = { version = "0.6", features = [  "postgres", "offline", "runtime-actix-rustls" ] }
 tokio-postgres = "0.7.6"
 env_logger = "0.8"
 log = "0.4.17"

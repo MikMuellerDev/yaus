@@ -28,13 +28,12 @@ async fn main() {
     //std::env::set_var("RUST_LOG", "debug");
     env_logger::init();
 
-    let mut conf = match config::read_config(
-        &env::var("YAUS_CONFIG_PATH").unwrap_or("config.toml".to_string()),
-    ) {
+    let config_path = &env::var("YAUS_CONFIG_PATH").unwrap_or("config.toml".to_string());
+    let mut conf = match config::read_config(config_path) {
         Ok(config) => config,
         Err(err) => {
             error!(
-                "Failed to read configuration file: {}",
+                "Failed to read configuration file at {config_path}: {}",
                 match err {
                     ConfigError::Io(err) => format!("IO error: {err}"),
                     ConfigError::Parse(err) => format!("Invalid TOML format: {err}"),
@@ -44,7 +43,7 @@ async fn main() {
         }
     };
 
-    // Scan environent variables
+    // Scan for environent variables
     conf.scan_env();
 
     // Initialize the database
@@ -90,7 +89,7 @@ async fn main() {
                     .route("/urls/{limit}", web::get().to(api::list_urls)),
             )
     })
-    .bind(("localhost", 8080))
+    .bind(("::0", conf.server.port))
     {
         Ok(server) => server,
         Err(err) => {
@@ -99,8 +98,9 @@ async fn main() {
         }
     };
     // Start the server
+    info!("YAUS is running on http://localhost:{}", conf.server.port);
     match server.run().await {
-        Ok(_) => (),
+        Ok(_) => warn!("YAUS is shutting down..."),
         Err(err) => {
             error!("Could not start HTTP server: {err}");
             process::exit(1);

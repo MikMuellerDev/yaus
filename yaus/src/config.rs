@@ -5,7 +5,7 @@ use std::{
     path::Path,
 };
 
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize};
 
 pub type Result<T> = std::result::Result<T, Error>;
 
@@ -26,8 +26,9 @@ impl From<toml::de::Error> for Error {
     }
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize)]
 pub struct Config {
+    pub server: ServerConfig,
     pub user: User,
     pub database: DatabaseConfig,
 }
@@ -35,13 +36,25 @@ pub struct Config {
 impl Default for Config {
     fn default() -> Self {
         Self {
+            server: ServerConfig::default(),
             user: User::default(),
             database: DatabaseConfig::default(),
         }
     }
 }
 
-#[derive(Clone, Deserialize, Serialize)]
+#[derive(Deserialize)]
+pub struct ServerConfig {
+    pub port: u16,
+}
+
+impl Default for ServerConfig {
+    fn default() -> Self {
+        Self { port: 8080 }
+    }
+}
+
+#[derive(Clone, Deserialize)]
 pub struct User {
     pub username: String,
     pub password: String,
@@ -56,7 +69,7 @@ impl Default for User {
     }
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize)]
 pub struct DatabaseConfig {
     pub hostname: String,
     pub port: u16,
@@ -102,6 +115,14 @@ impl Config {
     /// Uses an existing configuration and scans the environment variables
     /// Overrides any values from the config with more important environment variables
     pub fn scan_env(&mut self) {
+        // Service port
+        if let Ok(port) = env::var("YAUS_PORT") {
+            if let Ok(parsed_port) = port.parse::<u16>() {
+                debug!("Selected `YAUS_PORT` over value from config file");
+                self.server.port = parsed_port;
+            }
+        }
+
         // User configuration
         if let Ok(username) = env::var("YAUS_USERNAME") {
             debug!("Selected `YAUS_USERNAME` over value from config file");
