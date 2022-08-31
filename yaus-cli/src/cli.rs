@@ -1,6 +1,8 @@
 use crate::api::Client;
 use crate::api::Redirect;
 use crate::api::Result;
+use cli_table::CellStruct;
+use cli_table::{Cell, Style, Table};
 
 pub async fn create_redirect(client: &Client<'_>, redirect: &Redirect) -> Result<()> {
     println!("Creating redirect...",);
@@ -46,13 +48,27 @@ pub async fn list_redirects(client: &Client<'_>, max_entries: u32) -> Result<()>
             return Err(err);
         }
     };
+    let output = match &redirects.len() {
+        0 => format!("No redirects (empty set)"),
+        _ => {
+            let table = redirects
+                .into_iter()
+                .enumerate()
+                .map(|(index, redirect)| {
+                    vec![
+                        index.cell().dimmed(true),
+                        redirect.short.cell(),
+                        redirect.target_url.cell(),
+                    ]
+                })
+                .collect::<Vec<Vec<CellStruct>>>()
+                .table()
+                .title(vec!["".cell(), "Short ID".cell(), "Target URL".cell()])
+                .bold(true);
 
-    let output = redirects
-        .iter()
-        .map(|redirect| format!("Source: {:20} => {}", redirect.short, redirect.target_url))
-        .collect::<Vec<String>>()
-        .join("\n");
-
+            table.display().unwrap().to_string()
+        }
+    };
     println!("{output}");
     Ok(())
 }
