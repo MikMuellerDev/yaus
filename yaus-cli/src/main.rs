@@ -1,10 +1,17 @@
+use api::{Client, Error, Redirect, User};
+use clap::Parser;
 use std::process;
 
-use api::{Client, Error, User};
-
-use crate::api::Redirect;
-
 mod api;
+mod cli;
+
+#[derive(Parser)]
+#[clap(author, version, about)]
+struct Args {
+    /// A Foo value which does nothing
+    #[clap(short, long, value_parser)]
+    foo: Option<String>,
+}
 
 #[tokio::main]
 async fn main() {
@@ -31,6 +38,7 @@ async fn main() {
             process::exit(1);
         }
     };
+
     println!(
         "{:?}",
         client
