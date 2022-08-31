@@ -1,4 +1,4 @@
-use api::{Client, Error, Redirect, User};
+use api::{Client, Error, User};
 use clap::Parser;
 use std::process;
 
@@ -7,10 +7,18 @@ mod cli;
 
 #[derive(Parser)]
 #[clap(author, version, about)]
-struct Args {
-    /// A Foo value which does nothing
-    #[clap(short, long, value_parser)]
-    foo: Option<String>,
+enum Subcommand {
+    Add(AddArgs)
+}
+
+#[derive(Parser)]
+struct AddArgs {
+    /// The short id of the new redirect
+    #[clap(short, long)]
+    short: String,
+    /// The target URL of the new redirect
+    #[clap(short, long)]
+    target_url: String,
 }
 
 #[tokio::main]
@@ -39,16 +47,15 @@ async fn main() {
         }
     };
 
-    println!(
-        "{:?}",
-        client
-            .create_url(&Redirect {
-                short: "42".to_string(),
-                target_url: "http://gy-cfg.de".to_string()
-            })
-            .await
-    );
-    println!("{:?}", client.delete_url("42!?").await);
-    println!("{:?}", client.get_target("42").await);
-    println!("{:?}", client.list_urls().await);
+    match Subcommand:
+
+    let res = cli::list_redirects(&client).await;
+     // let res = cli::create_redirect(
+         // &client,
+         // &api::Redirect {
+             // short: "test".to_string(),
+             // target_url: "https://mik-mueller.de".to_string(),
+         // },
+     // ).await;
+    process::exit(if res.is_ok() { 0 } else { 1 })
 }

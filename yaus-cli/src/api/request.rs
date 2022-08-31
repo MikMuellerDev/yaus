@@ -11,7 +11,7 @@ impl Client<'_> {
         body: Option<Body>,
     ) -> Result<Request> {
         // Create a request
-        let mut request = self.client.request(method, self.url.join(path)?).query(&[
+        let request = self.client.request(method, self.url.join(path)?).query(&[
             ("username", self.user.username),
             ("password", self.user.password),
         ]);
