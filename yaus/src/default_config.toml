@@ -1,0 +1,12 @@
+# User configuration
+[user]
+username = 'admin'
+password = 'admin'
+
+# Database configuration
+[database]
+hostname = 'localhost'
+port = 5432
+username = 'yaus'
+password = 'password'
+database = 'yaus'

@@ -1,4 +1,4 @@
-use std::process;
+use std::{env, process};
 
 use actix_web::{
     middleware::Logger,
@@ -6,24 +6,21 @@ use actix_web::{
     App, HttpResponse, HttpServer,
 };
 use api::ValidCredentials;
-use serde::Deserialize;
+use config::User;
 use sqlx::PgPool;
 
 #[macro_use]
 extern crate log;
 
 mod api;
+mod config;
 mod db;
+
+use config::Error as ConfigError;
 
 pub struct State {
     pub db_pool: PgPool,
     pub user: User,
-}
-
-#[derive(Clone, Deserialize, Debug)]
-pub struct User {
-    pub username: String,
-    pub password: String,
 }
 
 #[actix_web::main]
@@ -31,22 +28,27 @@ async fn main() {
     //std::env::set_var("RUST_LOG", "debug");
     env_logger::init();
 
-    // TODO: replace with environment variables for configuration
-    let db_config = db::DBConfig {
-        hostname: "localhost".to_string(),
-        port: 5432,
-        username: "test".to_string(),
-        password: "test".to_string(),
-        database: "test".to_string(),
+    let mut conf = match config::read_config(
+        &env::var("YAUS_CONFIG_PATH").unwrap_or("config.toml".to_string()),
+    ) {
+        Ok(config) => config,
+        Err(err) => {
+            error!(
+                "Failed to read configuration file: {}",
+                match err {
+                    ConfigError::Io(err) => format!("IO error: {err}"),
+                    ConfigError::Parse(err) => format!("Invalid TOML format: {err}"),
+                }
+            );
+            process::exit(1);
+        }
     };
 
-    let user = User {
-        username: "test".to_string(),
-        password: "secret".to_string(),
-    };
+    // Scan environent variables
+    conf.scan_env();
 
     // Initialize the database
-    let db_pool = match db::connect(db_config).await {
+    let db_pool = match db::connect(&conf.database).await {
         Err(err) => {
             error!(
                 "Could not initialize database connection: {}",
@@ -74,7 +76,7 @@ async fn main() {
             .wrap(logger)
             .app_data(Data::new(State {
                 db_pool: db_pool.clone(),
-                user: user.clone(),
+                user: conf.user.clone(),
             }))
             .service(api::handle_redirect)
             .service(

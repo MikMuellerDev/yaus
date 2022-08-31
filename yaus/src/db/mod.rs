@@ -1,16 +1,10 @@
 use sqlx::{postgres::PgPoolOptions, PgPool};
 
+use crate::config::DatabaseConfig;
+
 pub mod url;
 
-pub struct DBConfig {
-    pub hostname: String,
-    pub port: u16,
-    pub username: String,
-    pub password: String,
-    pub database: String,
-}
-
-pub async fn connect(config: DBConfig) -> Result<PgPool, sqlx::Error> {
+pub async fn connect(config: &DatabaseConfig) -> Result<PgPool, sqlx::Error> {
     debug!("Initializing database pool...");
 
     // Create a database connection pool
