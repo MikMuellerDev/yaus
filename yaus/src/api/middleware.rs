@@ -70,10 +70,18 @@ where
                     "You must be authenticated to use the API",
                 ))
                 .map_into_right_body();
+            warn!(
+                "Rejecting invalid authentication for route `{}`",
+                request.path()
+            );
             return Box::pin(async { Ok(ServiceResponse::new(request.into_parts().0, response)) });
         }
 
         // Forward any valid requests to the original handler
+        trace!(
+            "Accepting valid authentication for route `{}`",
+            request.path()
+        );
         let res = self.service.call(request);
         Box::pin(async move { res.await.map(ServiceResponse::map_into_left_body) })
     }
