@@ -3,7 +3,7 @@ use std::process;
 use actix_web::{
     middleware::Logger,
     web::{self, Data},
-    App, HttpServer,
+    App, HttpResponse, HttpServer,
 };
 use api::ValidCredentials;
 use serde::Deserialize;
@@ -81,8 +81,10 @@ async fn main() {
                 // Is required in order to enable the authentication middleware just for the `/api` scope
                 web::scope("/api")
                     .wrap(ValidCredentials)
+                    .route("/auth", web::get().to(|| HttpResponse::Ok()))
+                    .route("/url/{short_id}", web::get().to(api::get_target))
                     .route("/url", web::post().to(api::create_url))
-                    .route("/url/{query}", web::delete().to(api::delete_url))
+                    .route("/url/{short_id}", web::delete().to(api::delete_url))
                     .route("/urls", web::get().to(api::list_urls)),
             )
     })

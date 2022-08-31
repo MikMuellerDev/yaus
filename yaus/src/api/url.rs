@@ -40,6 +40,17 @@ pub async fn delete_url(to_delete: Path<String>, state: Data<State>) -> HttpResp
     }
 }
 
+pub async fn get_target(requested_resource: Path<String>, state: Data<State>) -> HttpResponse {
+    // Fetch the target URL from the database
+    match url::get_url(&requested_resource, &state.db_pool).await {
+        Ok(url) => HttpResponse::Ok().json(url),
+        Err(_) => HttpResponse::UnprocessableEntity().json(GenericResponse::err(
+            &format!("Cannot get target URL of `{requested_resource}`"),
+            "this shortened url was not found",
+        )),
+    }
+}
+
 pub async fn list_urls(state: Data<State>) -> HttpResponse {
     match url::list_urls(&state.db_pool).await {
         Ok(urls) => HttpResponse::Ok().json(urls),
@@ -52,6 +63,7 @@ pub async fn list_urls(state: Data<State>) -> HttpResponse {
 
 #[get("/{short}")]
 pub async fn handle_redirect(requested_resource: Path<String>, state: Data<State>) -> HttpResponse {
+    // Fetch the target URL from the database
     let url = match url::get_url(&requested_resource, &state.db_pool).await {
         Ok(url) => url,
         Err(_) => {
@@ -61,7 +73,7 @@ pub async fn handle_redirect(requested_resource: Path<String>, state: Data<State
             ))
         }
     };
-
+    // Send the redirect target URL to the client
     HttpResponse::TemporaryRedirect()
         .append_header((
             header::LOCATION,
