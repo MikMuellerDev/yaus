@@ -7,8 +7,26 @@ use crate::db::url::{self, Error, Url};
 use crate::{State, User};
 
 pub async fn create_url(body: Json<Url>, _: Query<User>, state: Data<State>) -> HttpResponse {
+    // Validate the user's input
+    if body.short.len() > 20 {
+        return HttpResponse::PayloadTooLarge().json(GenericResponse::err(
+            "Could not create short url",
+            "The short ID may not exceed 20 characters",
+        ));
+    };
+    if body.target_url.len() > 500 {
+        return HttpResponse::PayloadTooLarge().json(GenericResponse::err(
+            "Could not create short url",
+            "The target URL may not exceed 500 characters",
+        ));
+    };
+    // Create the URL in the database
     match url::create_url(&body, &state.db_pool).await {
         Ok(_) => {
+            info!(
+                "Created redirect from `{}` to `{}`",
+                body.short, body.target_url
+            );
             HttpResponse::Ok().json(GenericResponse::success("Successfully created short URL"))
         }
         Err(err) => {
@@ -26,7 +44,10 @@ pub async fn create_url(body: Json<Url>, _: Query<User>, state: Data<State>) -> 
 
 pub async fn delete_url(to_delete: Path<String>, state: Data<State>) -> HttpResponse {
     match url::delete_url(&to_delete, &state.db_pool).await {
-        Ok(_) => HttpResponse::Ok().json(GenericResponse::success("Successfully deleted URL")),
+        Ok(_) => {
+            info!("Deleted redirect `{to_delete}`");
+            HttpResponse::Ok().json(GenericResponse::success("Successfully deleted URL"))
+        }
         Err(err) => {
             let error_message = "Could not delete URL";
             match err {
