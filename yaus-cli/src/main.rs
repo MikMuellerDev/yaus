@@ -4,13 +4,14 @@ use std::process;
 
 mod api;
 mod cli;
+mod config;
 
 #[derive(Parser)]
 #[clap(author, version, about)]
 enum Yaus {
     #[clap(arg_required_else_help = true)]
     /// Create a new short-URL
-    New {
+    Add {
         /// The short id of the new redirect
         #[clap(required = true)]
         short: String,
@@ -41,12 +42,29 @@ enum Yaus {
 
 #[tokio::main]
 async fn main() {
+    // Get the configuration file location
+    let config_file_path = match config::file_path() {
+        Ok(path) => path,
+        Err(err) => {
+            eprintln!("{err}");
+            process::exit(1);
+        }
+    };
+    // Read the configuration file
+    let conf = match config::read_config(&config_file_path).await {
+        Ok(conf) => conf,
+        Err(err) => {
+            eprintln!("Could not read configuration file (at `{config_file_path}`): {err})");
+            process::exit(1);
+        }
+    };
+
     // Create the Yaus client, handle potential errors
     let client = match Client::new(
-        "http://localhost:8080",
+        &conf.url,
         User {
-            username: "test",
-            password: "secret",
+            username: &conf.user,
+            password: &conf.password,
         },
     )
     .await
@@ -64,6 +82,8 @@ async fn main() {
             process::exit(1);
         }
     };
+
+    // Execute different functions based on the Clap subcommand
     let success = match Yaus::parse() {
         Yaus::List { max } => {
             cli::list_redirects(&client, if let Some(max) = max { max } else { u32::MAX })
@@ -71,7 +91,7 @@ async fn main() {
                 .is_ok()
         }
         Yaus::Get { short } => cli::get_target(&client, &short).await.is_ok(),
-        Yaus::New { short, target_url } => {
+        Yaus::Add { short, target_url } => {
             cli::create_redirect(&client, &api::Redirect { short, target_url })
                 .await
                 .is_ok()
