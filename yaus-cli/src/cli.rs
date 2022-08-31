@@ -16,7 +16,7 @@ pub async fn create_redirect(client: &Client<'_>, redirect: &Redirect) -> Result
 }
 
 pub async fn delete_redirect(client: &Client<'_>, short_id: &str) -> Result<()> {
-    println!("Deleting redirect...",);
+    println!("Deleting redirect `{short_id}`...",);
     if let Err(err) = client.delete_url(short_id).await {
         eprintln!("Could not delete redirect: {:?}", err);
         return Err(err);
@@ -38,8 +38,8 @@ pub async fn get_target(client: &Client<'_>, short_id: &str) -> Result<()> {
     }
 }
 
-pub async fn list_redirects(client: &Client<'_>) -> Result<()> {
-    let redirects = match client.list_urls().await {
+pub async fn list_redirects(client: &Client<'_>, max_entries: u32) -> Result<()> {
+    let redirects = match client.list_urls(max_entries).await {
         Ok(response) => response,
         Err(err) => {
             eprintln!("Could not list all redirects: {:?}", err);

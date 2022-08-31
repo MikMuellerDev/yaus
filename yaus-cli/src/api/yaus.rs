@@ -11,10 +11,14 @@ pub struct Redirect {
 }
 
 impl Client<'_> {
-    pub async fn list_urls(&self) -> Result<Vec<Redirect>> {
+    pub async fn list_urls(&self, max_entries: u32) -> Result<Vec<Redirect>> {
         let result = self
             .client
-            .execute(self.build_request::<()>(Method::GET, "/api/urls", None)?)
+            .execute(self.build_request::<()>(
+                Method::GET,
+                &format!("/api/urls/{max_entries}"),
+                None,
+            )?)
             .await?;
         match result.status() {
             StatusCode::OK => Ok(result.json().await?),
