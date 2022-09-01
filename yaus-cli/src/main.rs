@@ -50,6 +50,10 @@ async fn main() {
             process::exit(1);
         }
     };
+
+    // Parse CLI arguments
+    let args = Yaus::parse();
+
     // Read the configuration file
     let conf = match config::read_config(&config_file_path).await {
         Ok(conf) => conf,
@@ -82,9 +86,8 @@ async fn main() {
             process::exit(1);
         }
     };
-
     // Execute different functions based on the Clap subcommand
-    let success = match Yaus::parse() {
+    let success = match args {
         Yaus::List { max } => {
             cli::list_redirects(&client, if let Some(max) = max { max } else { u32::MAX })
                 .await
