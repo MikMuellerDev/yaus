@@ -1,5 +1,8 @@
 [package]
 name = "yaus-cli"
+description = "A CLI client for the Yaus server"
+license = "GPL-2.0-only"
+repository = "https://github.com/MikMuellerDev/yaus"
 version = "0.1.0"
 edition = "2021"
 
