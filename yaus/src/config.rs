@@ -5,7 +5,7 @@ use std::{
     path::Path,
 };
 
-use serde::{Deserialize};
+use serde::Deserialize;
 
 pub type Result<T> = std::result::Result<T, Error>;
 
@@ -69,10 +69,10 @@ impl Default for User {
     }
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct DatabaseConfig {
     pub hostname: String,
-    pub port: u16,
+    pub port: u32,
     pub username: String,
     pub password: String,
     pub database: String,
@@ -139,7 +139,7 @@ impl Config {
             self.database.hostname = db_hostname
         }
         if let Ok(db_port) = env::var("YAUS_DB_PORT") {
-            if let Ok(parsed_port) = db_port.parse::<u16>() {
+            if let Ok(parsed_port) = db_port.parse::<u32>() {
                 debug!("Selected `YAUS_DB_PORT` over value from config file");
                 self.database.port = parsed_port;
             }

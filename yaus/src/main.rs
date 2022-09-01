@@ -50,8 +50,9 @@ async fn main() {
     let db_pool = match db::connect(&conf.database).await {
         Err(err) => {
             error!(
-                "Could not initialize database connection: {}",
-                err.to_string()
+                "Could not initialize database connection: {}\n{:?}",
+                err.to_string(),
+                &conf.database,
             );
             process::exit(1);
         }

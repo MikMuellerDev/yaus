@@ -6,5 +6,11 @@ docker:
 		--target=x86_64-unknown-linux-musl \
 		--release
 	cp ../target/x86_64-unknown-linux-musl/release/yaus .
-	docker build . -t mikmuellerdev/yaus:$(version)
-	rm ./yaus
+	docker build . \
+		-t mikmuellerdev/yaus:$(version) \
+		-t mikmuellerdev/yaus:latest
+
+docker-push:
+	docker push mikmuellerdev/yaus:$(version)
+	docker push mikmuellerdev/yaus:latest
+
