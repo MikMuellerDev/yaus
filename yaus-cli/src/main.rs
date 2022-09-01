@@ -38,6 +38,8 @@ enum Yaus {
         #[clap(short, long)]
         max: Option<u32>,
     },
+    /// Prints the location of the configuration file
+    Config,
 }
 
 #[tokio::main]
@@ -88,6 +90,10 @@ async fn main() {
     };
     // Execute different functions based on the Clap subcommand
     let success = match args {
+        Yaus::Config => {
+            println!("Configuration file is located at `{config_file_path}`");
+            true
+        }
         Yaus::List { max } => {
             cli::list_redirects(&client, if let Some(max) = max { max } else { u32::MAX })
                 .await
