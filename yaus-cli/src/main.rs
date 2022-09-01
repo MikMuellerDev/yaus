@@ -62,7 +62,7 @@ async fn main() {
             process::exit(1);
         }
     };
-
+    println!("Connecting to server ({}@{})...", conf.user, conf.url);
     // Create the Yaus client, handle potential errors
     let client = match Client::new(
         &conf.url,
