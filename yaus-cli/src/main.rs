@@ -6,7 +6,7 @@ mod api;
 mod cli;
 mod config;
 
-#[derive(Parser)]
+#[derive(Parser, PartialEq)]
 #[clap(author, version, about)]
 enum Yaus {
     #[clap(arg_required_else_help = true)]
@@ -55,6 +55,11 @@ async fn main() {
 
     // Parse CLI arguments
     let args = Yaus::parse();
+    // If the subcommand is set to config, do not attempt to connect to the server and stop here
+    if args == Yaus::Config {
+        println!("Configuration file is located at `{config_file_path}`");
+        process::exit(0);
+    }
 
     // Read the configuration file
     let conf = match config::read_config(&config_file_path).await {
@@ -90,10 +95,7 @@ async fn main() {
     };
     // Execute different functions based on the Clap subcommand
     let success = match args {
-        Yaus::Config => {
-            println!("Configuration file is located at `{config_file_path}`");
-            true
-        }
+        Yaus::Config => unreachable!("This case should have been handled beforehand"),
         Yaus::List { max } => {
             cli::list_redirects(&client, if let Some(max) = max { max } else { u32::MAX })
                 .await
