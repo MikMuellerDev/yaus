@@ -57,13 +57,17 @@ pub async fn list_redirects(client: &Client<'_>, max_entries: u32) -> Result<()>
                 .map(|(index, redirect)| {
                     vec![
                         index.cell().dimmed(true),
-                        redirect.short.cell(),
+                        client
+                            .url
+                            .join(&redirect.short)
+                            .expect("A client can only exist with a valid base-URL")
+                            .cell(),
                         redirect.target_url.cell(),
                     ]
                 })
                 .collect::<Vec<Vec<CellStruct>>>()
                 .table()
-                .title(vec!["".cell(), "Short ID".cell(), "Target URL".cell()])
+                .title(vec!["".cell(), "Source URL".cell(), "Target URL".cell()])
                 .bold(true);
 
             table.display().unwrap().to_string()
