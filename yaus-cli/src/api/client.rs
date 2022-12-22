@@ -17,7 +17,7 @@ pub struct User<'user> {
     pub password: &'user str,
 }
 
-impl<'client> Client<'_> {
+impl<'client> Client<'client> {
     pub async fn new(raw_url: &str, user: User<'client>) -> Result<Client<'client>> {
         // Parse the source url into an URL struct
         let url = Url::parse(raw_url)?;
